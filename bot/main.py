@@ -5,6 +5,7 @@ from telegram.ext import (
 
 from config import BOT_TOKEN
 from handlers import start_command
+from analyzer_handler import analyze_match
 
 
 def main():
