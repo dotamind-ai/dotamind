@@ -4,7 +4,8 @@ from telegram.ext import ContextTypes
 from dota_api import get_match
 from heroes import get_hero_name
 
-from analyzers.match_analyzer import analyze_match as run_match_analysis
+from analyzers.match_analyzer import analyze_match as run_player_analysis
+from analyzers.draft_analyzer import analyze_draft
 
 
 
@@ -19,9 +20,7 @@ async def analyze_match_command(
     if not match_id.isdigit():
 
         await update.message.reply_text(
-            "❌ Отправь только ID матча Dota 2.\n\n"
-            "Пример:\n"
-            "8123456789"
+            "❌ Отправь ID матча Dota 2."
         )
 
         return
@@ -42,8 +41,7 @@ async def analyze_match_command(
     if not match:
 
         await update.message.reply_text(
-            "❌ Матч не найден.\n"
-            "Проверь Match ID."
+            "❌ Матч не найден."
         )
 
         return
@@ -59,17 +57,22 @@ async def analyze_match_command(
     if not players:
 
         await update.message.reply_text(
-            "❌ Данные игроков отсутствуют."
+            "❌ Игроки не найдены."
         )
 
         return
 
 
 
-    # Временно анализируем первого игрока
-    # Позже сделаем выбор игрока из 10
-    player = players[0]
+    # Анализ всего драфта
+    draft = analyze_draft(
+        players
+    )
 
+
+
+    # Пока берем первого игрока
+    player = players[0]
 
 
     hero_id = player.get(
@@ -84,7 +87,7 @@ async def analyze_match_command(
 
 
 
-    analysis = run_match_analysis(
+    player_analysis = run_player_analysis(
         player,
         hero_name
     )
@@ -95,13 +98,13 @@ async def analyze_match_command(
 
         "🎮 DOTAMIND AI\n\n"
 
-        f"🆔 Match ID:\n"
-        f"{match_id}\n\n"
+        f"🦸 Герой: {hero_name}\n\n"
 
-        f"🦸 Герой:\n"
-        f"{analysis['hero']}\n\n"
+        f"⚔️ Анализ драфта:\n"
+        f"Оценка: {draft['score']}/10\n"
+        f"{draft['comment']}\n\n"
 
-        f"{analysis['summary']}"
+        f"{player_analysis['summary']}"
     )
 
 
@@ -112,5 +115,4 @@ async def analyze_match_command(
 
 
 
-# Совместимость с main.py
 analyze_match = analyze_match_command
