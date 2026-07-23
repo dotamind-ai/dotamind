@@ -1,13 +1,15 @@
-def analyze_draft(
-    players
-):
+from data.heroes_meta import get_hero_meta
+
+
+
+def analyze_draft(players):
+
     """
-    Анализ драфта команды
+    Анализ состава команд
     """
 
 
-    radiant = []
-    dire = []
+    heroes = []
 
 
     for player in players:
@@ -18,55 +20,38 @@ def analyze_draft(
         )
 
 
-        team = player.get(
-            "isRadiant",
-            True
+        heroes.append(
+            hero_id
         )
-
-
-        if team:
-
-            radiant.append(
-                hero_id
-            )
-
-        else:
-
-            dire.append(
-                hero_id
-            )
 
 
 
     result = {
 
-        "radiant_count": len(
-            radiant
-        ),
-
-        "dire_count": len(
-            dire
+        "heroes_count": len(
+            heroes
         ),
 
         "comment": ""
+
     }
 
 
 
-    if len(radiant) == 5 and len(dire) == 5:
+    if len(heroes) == 10:
 
         result["comment"] = (
-            "⚔️ Оба состава полные.\n"
-            "Можно проводить анализ матчапов."
+            "⚔️ Полный драфт найден.\n"
+            "Можно анализировать матчапы."
         )
+
 
     else:
 
         result["comment"] = (
-            "⚠️ Недостаточно данных "
+            "⚠️ Данных недостаточно "
             "для полного анализа драфта."
         )
-
 
 
     return result
