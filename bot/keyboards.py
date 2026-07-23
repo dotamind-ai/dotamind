@@ -1,5 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+from heroes import get_hero_name
+
 
 
 def players_keyboard(players):
@@ -9,9 +11,14 @@ def players_keyboard(players):
 
     for index, player in enumerate(players, start=1):
 
-        hero_name = player.get(
-            "hero_name",
-            f"Игрок {index}"
+        hero_id = player.get(
+            "hero_id",
+            0
+        )
+
+
+        hero_name = get_hero_name(
+            hero_id
         )
 
 
