@@ -7,6 +7,8 @@ from heroes import get_hero_name
 from analyzers.match_analyzer import analyze_match as run_player_analysis
 from analyzers.draft_analyzer import analyze_draft
 
+from player_selector import save_players, get_player
+
 
 
 async def analyze_match_command(
@@ -14,21 +16,63 @@ async def analyze_match_command(
     context: ContextTypes.DEFAULT_TYPE
 ):
 
-    match_id = update.message.text.strip()
+    user_id = update.message.from_user.id
+
+    text = update.message.text.strip()
 
 
-    if not match_id.isdigit():
 
-        await update.message.reply_text(
-            "❌ Отправь ID матча Dota 2."
+    # Если пользователь отправил номер игрока
+    if text.isdigit() and len(text) <= 2:
+
+        player = get_player(
+            user_id,
+            int(text)
         )
 
-        return
+
+        if player:
+
+            hero_id = player.get(
+                "hero_id",
+                0
+            )
+
+
+            hero_name = get_hero_name(
+                hero_id
+            )
+
+
+            analysis = run_player_analysis(
+                player,
+                hero_name
+            )
+
+
+            await update.message.reply_text(
+
+                "🎮 DOTAMIND AI\n\n"
+
+                f"🦸 Герой: {hero_name}\n\n"
+
+                f"{analysis['summary']}"
+
+            )
+
+
+            return
+
+
+
+    # Иначе считаем, что это Match ID
+
+    match_id = text
 
 
 
     await update.message.reply_text(
-        "🔎 Анализирую матч..."
+        "🔎 Ищу матч..."
     )
 
 
@@ -64,53 +108,64 @@ async def analyze_match_command(
 
 
 
-    # Анализ всего драфта
+    # Сохраняем игроков
+
+    save_players(
+        user_id,
+        players
+    )
+
+
+
     draft = analyze_draft(
         players
     )
 
 
 
-    # Пока берем первого игрока
-    player = players[0]
+    message = (
 
+        "🎮 Матч найден!\n\n"
 
-    hero_id = player.get(
-        "hero_id",
-        0
-    )
-
-
-    hero_name = get_hero_name(
-        hero_id
+        "Выбери игрока для анализа:\n\n"
     )
 
 
 
-    player_analysis = run_player_analysis(
-        player,
-        hero_name
-    )
+    for index, player in enumerate(players, start=1):
+
+        hero_id = player.get(
+            "hero_id",
+            0
+        )
+
+
+        hero_name = get_hero_name(
+            hero_id
+        )
+
+
+        message += (
+            f"{index}. {hero_name}\n"
+        )
 
 
 
-    report = (
+    message += (
 
-        "🎮 DOTAMIND AI\n\n"
+        "\n⚔️ Анализ драфта:\n"
 
-        f"🦸 Герой: {hero_name}\n\n"
+        f"{draft['score']}/10\n"
 
-        f"⚔️ Анализ драфта:\n"
-        f"Оценка: {draft['score']}/10\n"
         f"{draft['comment']}\n\n"
 
-        f"{player_analysis['summary']}"
+        "Отправь номер игрока."
     )
 
 
 
     await update.message.reply_text(
-        report
+        message
     )
 
 
