@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 from dota_api import get_match
 from heroes import get_hero_name
 
-from analyzers.match_analyzer import analyze_match
+from analyzers.match_analyzer import analyze_match as run_match_analysis
 
 
 
@@ -19,7 +19,7 @@ async def analyze_match_command(
     if not match_id.isdigit():
 
         await update.message.reply_text(
-            "❌ Отправь ID матча Dota 2.\n\n"
+            "❌ Отправь только ID матча Dota 2.\n\n"
             "Пример:\n"
             "8123456789"
         )
@@ -42,7 +42,8 @@ async def analyze_match_command(
     if not match:
 
         await update.message.reply_text(
-            "❌ Матч не найден."
+            "❌ Матч не найден.\n"
+            "Проверь Match ID."
         )
 
         return
@@ -58,14 +59,15 @@ async def analyze_match_command(
     if not players:
 
         await update.message.reply_text(
-            "❌ Игроки не найдены."
+            "❌ Данные игроков отсутствуют."
         )
 
         return
 
 
 
-    # Пока берем первого игрока
+    # Временно анализируем первого игрока
+    # Позже сделаем выбор игрока из 10
     player = players[0]
 
 
@@ -82,7 +84,7 @@ async def analyze_match_command(
 
 
 
-    analysis = analyze_match(
+    analysis = run_match_analysis(
         player,
         hero_name
     )
@@ -92,6 +94,9 @@ async def analyze_match_command(
     report = (
 
         "🎮 DOTAMIND AI\n\n"
+
+        f"🆔 Match ID:\n"
+        f"{match_id}\n\n"
 
         f"🦸 Герой:\n"
         f"{analysis['hero']}\n\n"
@@ -104,3 +109,8 @@ async def analyze_match_command(
     await update.message.reply_text(
         report
     )
+
+
+
+# Совместимость с main.py
+analyze_match = analyze_match_command
