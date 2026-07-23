@@ -1,22 +1,36 @@
 from data.roles import get_roles
+from data.hero_converter import convert_hero_id
 
 
 
 def analyze_draft(players):
 
     """
-    Анализ драфта команды
+    Анализ состава команд
     """
 
 
     roles = []
 
+    heroes = []
+
+
 
     for player in players:
 
-        hero_name = player.get(
-            "hero_name",
-            "Unknown"
+        hero_id = player.get(
+            "hero_id",
+            0
+        )
+
+
+        hero_name = convert_hero_id(
+            hero_id
+        )
+
+
+        heroes.append(
+            hero_name
         )
 
 
@@ -56,7 +70,7 @@ def analyze_draft(players):
         score -= 2
 
         problems.append(
-            "Слишком много героев требуют фарма."
+            "⚠️ Слишком много героев требуют фарма."
         )
 
 
@@ -66,7 +80,7 @@ def analyze_draft(players):
         score -= 2
 
         problems.append(
-            "Нет поддержки в составе."
+            "⚠️ Нет поддержки."
         )
 
 
@@ -76,7 +90,7 @@ def analyze_draft(players):
         score -= 2
 
         problems.append(
-            "Нет героя для начала драки."
+            "⚠️ Нет героя для начала драки."
         )
 
 
@@ -104,6 +118,8 @@ def analyze_draft(players):
     return {
 
         "score": score,
+
+        "heroes": heroes,
 
         "carry": carry_count,
 
