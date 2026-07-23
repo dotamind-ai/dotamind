@@ -1,57 +1,115 @@
-from data.heroes_meta import get_hero_meta
+from data.roles import get_roles
 
 
 
 def analyze_draft(players):
 
     """
-    Анализ состава команд
+    Анализ драфта команды
     """
 
 
-    heroes = []
+    roles = []
 
 
     for player in players:
 
-        hero_id = player.get(
-            "hero_id",
-            0
+        hero_name = player.get(
+            "hero_name",
+            "Unknown"
         )
 
 
-        heroes.append(
-            hero_id
+        hero_roles = get_roles(
+            hero_name
+        )
+
+
+        roles.extend(
+            hero_roles
         )
 
 
 
-    result = {
+    carry_count = roles.count(
+        "Carry"
+    )
 
-        "heroes_count": len(
-            heroes
-        ),
+    support_count = roles.count(
+        "Support"
+    )
 
-        "comment": ""
+    initiator_count = roles.count(
+        "Initiator"
+    )
 
-    }
+
+
+    score = 10
+
+    problems = []
 
 
 
-    if len(heroes) == 10:
+    if carry_count >= 3:
 
-        result["comment"] = (
-            "⚔️ Полный драфт найден.\n"
-            "Можно анализировать матчапы."
+        score -= 2
+
+        problems.append(
+            "Слишком много героев требуют фарма."
         )
 
+
+
+    if support_count == 0:
+
+        score -= 2
+
+        problems.append(
+            "Нет поддержки в составе."
+        )
+
+
+
+    if initiator_count == 0:
+
+        score -= 2
+
+        problems.append(
+            "Нет героя для начала драки."
+        )
+
+
+
+    if score < 0:
+
+        score = 0
+
+
+
+    if not problems:
+
+        comment = (
+            "✅ Состав выглядит сбалансированным."
+        )
 
     else:
 
-        result["comment"] = (
-            "⚠️ Данных недостаточно "
-            "для полного анализа драфта."
+        comment = "\n".join(
+            problems
         )
 
 
-    return result
+
+    return {
+
+        "score": score,
+
+        "carry": carry_count,
+
+        "support": support_count,
+
+        "initiator": initiator_count,
+
+        "comment": comment
+    }
