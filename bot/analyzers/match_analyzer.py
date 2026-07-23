@@ -1,6 +1,7 @@
 from analyzers.farm_analyzer import analyze_farm
 from analyzers.death_analyzer import analyze_deaths
 from analyzers.kda_analyzer import analyze_kda
+from analyzers.item_analyzer import analyze_items
 
 
 
@@ -25,12 +26,20 @@ def analyze_match(player, hero_name):
     )
 
 
+    items = analyze_items(
+        player
+    )
+
+
+
     summary = generate_summary(
         hero_name,
         farm,
         deaths,
-        kda
+        kda,
+        items
     )
+
 
 
     return {
@@ -43,8 +52,11 @@ def analyze_match(player, hero_name):
 
         "kda": kda,
 
+        "items": items,
+
         "summary": summary
     }
+
 
 
 
@@ -53,7 +65,8 @@ def generate_summary(
         hero_name,
         farm,
         deaths,
-        kda
+        kda,
+        items
 ):
 
     messages = []
@@ -83,8 +96,17 @@ def generate_summary(
 
 
     messages.append(
-        "📈 Следующий этап — анализ "
-        "предметов, талантов и решений игрока."
+        f"🛒 Предметы: {items['count']}/6\n"
+        f"{items['comment']}"
+    )
+
+
+    messages.append(
+        "🤖 AI-анализ будет расширяться:\n"
+        "- пики и контрпики\n"
+        "- таланты\n"
+        "- прокачка скиллов\n"
+        "- ошибки по карте"
     )
 
 
