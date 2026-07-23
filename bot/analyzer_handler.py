@@ -3,10 +3,12 @@ from telegram.ext import ContextTypes
 
 from dota_api import get_match
 from heroes import get_hero_name
-from analyzers.farm_analyzer import analyze_farm
+
+from analyzers.match_analyzer import analyze_match
 
 
-async def analyze_match(
+
+async def analyze_match_command(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
 ):
@@ -17,7 +19,7 @@ async def analyze_match(
     if not match_id.isdigit():
 
         await update.message.reply_text(
-            "❌ Отправь только ID матча Dota 2.\n\n"
+            "❌ Отправь ID матча Dota 2.\n\n"
             "Пример:\n"
             "8123456789"
         )
@@ -27,28 +29,24 @@ async def analyze_match(
 
 
     await update.message.reply_text(
-        "🔎 Ищу матч Dota 2..."
+        "🔎 Анализирую матч..."
     )
 
 
-    match = get_match(match_id)
+
+    match = get_match(
+        match_id
+    )
 
 
     if not match:
 
         await update.message.reply_text(
-            "❌ Матч не найден.\n"
-            "Проверь Match ID."
+            "❌ Матч не найден."
         )
 
         return
 
-
-
-    duration = match.get(
-        "duration",
-        0
-    )
 
 
     players = match.get(
@@ -57,34 +55,19 @@ async def analyze_match(
     )
 
 
-    if len(players) == 0:
+    if not players:
 
         await update.message.reply_text(
-            "❌ Данные игроков отсутствуют."
+            "❌ Игроки не найдены."
         )
 
         return
 
 
 
-    # Пока анализируем первого игрока
+    # Пока берем первого игрока
     player = players[0]
 
-
-    kills = player.get(
-        "kills",
-        0
-    )
-
-    deaths = player.get(
-        "deaths",
-        0
-    )
-
-    assists = player.get(
-        "assists",
-        0
-    )
 
 
     hero_id = player.get(
@@ -98,21 +81,10 @@ async def analyze_match(
     )
 
 
-    gpm = player.get(
-        "gold_per_min",
-        0
-    )
 
-
-    xpm = player.get(
-        "xp_per_min",
-        0
-    )
-
-
-    # Анализ фарма
-    farm_result = analyze_farm(
-        player
+    analysis = analyze_match(
+        player,
+        hero_name
     )
 
 
@@ -121,28 +93,12 @@ async def analyze_match(
 
         "🎮 DOTAMIND AI\n\n"
 
-        f"🆔 Match ID:\n"
-        f"{match_id}\n\n"
-
         f"🦸 Герой:\n"
-        f"{hero_name}\n\n"
+        f"{analysis['hero']}\n\n"
 
-        f"⚔️ KDA:\n"
-        f"{kills}/{deaths}/{assists}\n\n"
-
-        f"💰 GPM: {gpm}\n"
-        f"⭐ XPM: {xpm}\n\n"
-
-        f"📊 Анализ фарма:\n"
-        f"Оценка: {farm_result['score']}/10\n\n"
-        f"{farm_result['comment']}\n\n"
-
-        f"⏱ Длительность игры:\n"
-        f"{duration // 60} минут\n\n"
-
-        "✅ Базовый анализ готов.\n"
-        "Следующий этап — анализ ошибок."
+        f"{analysis['summary']}"
     )
+
 
 
     await update.message.reply_text(
