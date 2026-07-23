@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from dota_api import get_match
 from heroes import get_hero_name
+from analyzers.farm_analyzer import analyze_farm
 
 
 async def analyze_match(
