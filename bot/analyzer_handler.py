@@ -14,7 +14,6 @@ async def analyze_match(
     match_id = update.message.text.strip()
 
 
-    # Проверка Match ID
     if not match_id.isdigit():
 
         await update.message.reply_text(
@@ -32,7 +31,6 @@ async def analyze_match(
     )
 
 
-    # Получаем данные матча
     match = get_match(match_id)
 
 
@@ -62,14 +60,14 @@ async def analyze_match(
     if len(players) == 0:
 
         await update.message.reply_text(
-            "❌ Нет данных игроков."
+            "❌ Данные игроков отсутствуют."
         )
 
         return
 
 
 
-    # Берем первого игрока
+    # Пока анализируем первого игрока
     player = players[0]
 
 
@@ -112,6 +110,12 @@ async def analyze_match(
     )
 
 
+    # Анализ фарма
+    farm_result = analyze_farm(
+        player
+    )
+
+
 
     report = (
 
@@ -129,11 +133,15 @@ async def analyze_match(
         f"💰 GPM: {gpm}\n"
         f"⭐ XPM: {xpm}\n\n"
 
-        f"⏱ Время игры:\n"
+        f"📊 Анализ фарма:\n"
+        f"Оценка: {farm_result['score']}/10\n\n"
+        f"{farm_result['comment']}\n\n"
+
+        f"⏱ Длительность игры:\n"
         f"{duration // 60} минут\n\n"
 
         "✅ Базовый анализ готов.\n"
-        "Следующий этап: поиск ошибок игрока."
+        "Следующий этап — анализ ошибок."
     )
 
 
